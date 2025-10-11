@@ -16,7 +16,14 @@ class turtleCreator(turtle.Turtle):
         self.color(color)
         self.teleport(xCoor,yCoor)
 
+class GameState:
+    def __init__(self, state="idle"):
+        self.currentState=state
 
+    def changeState(self, newState:str):
+        self.currentState=newState
+
+        
 class ScreenClass():
     def __init__(self):
         self.screen=turtle._Screen
