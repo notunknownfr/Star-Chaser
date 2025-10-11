@@ -1,4 +1,4 @@
-import turtle
+from turtle import _Screen, Turtle, done
 from PIL import Image
 from time import time, sleep
 import random
@@ -8,7 +8,7 @@ import os
 turtlesList=[]
 
 
-class turtleCreator(turtle.Turtle):
+class turtleCreator(Turtle):
     def __init__(self,shape,color,xCoor,yCoor):
         
         turtlesList.append(self)
@@ -23,10 +23,10 @@ class GameState:
     def changeState(self, newState:str):
         self.currentState=newState
 
-        
+
 class ScreenClass():
     def __init__(self):
-        self.screen=turtle._Screen
+        self.screen=_Screen
         self.screen.setup(1.0, 1.0)
         self.selectStartGame = turtleCreator("square", "white", -58, 180)
         self.selectHistory = turtleCreator("square", "white", 25.9, 115)
@@ -47,26 +47,21 @@ class ScreenClass():
         img.save("history.gif")
 
 
-
     def StartScreenSetup(self):
-        self.bgpic("thumb.gif")
+        self.screen.bgpic("thumb.gif")
 
         t=turtleCreator("square","white",0,70)
         t.teleport(-230,-30)
         t.write("PRESS S TO START GAME\n\nPRESS H TO DISPLAY SCORE HISTORY\n\nPRESS ESCAPE TO EXIT THE GAME\n\nPRESS C TO CHANGE KEY SETTINGS")
         t.hideturtle()
-        
        
         self.selectStartGame.shapesize(1.3,17)
         self.selectHistory.shapesize(1.3,25.8)
         self.selectExit.shapesize(1.3,23.2)
         self.changeKeyBindTurtle.shapesize(1.3,24.3)
 
-        
-
-
 class KeyBindManager:
-    def __init__(self, screen: ScreenClass):
+    def __init__(self, screen: _Screen):
         self.screen = screen
 
 
@@ -216,3 +211,5 @@ class fileManager:
                 
         self.score_file.close()
 
+
+done()
