@@ -10,11 +10,11 @@ turtlesList=[]
 
 class turtleCreator(Turtle):
     def __init__(self,shape,color,xCoor,yCoor):
-        
         turtlesList.append(self)
         self.shape(shape)
         self.color(color)
         self.teleport(xCoor,yCoor)
+
 
 class GameState:
     def __init__(self, state="idle"):
@@ -22,7 +22,6 @@ class GameState:
 
     def changeState(self, newState:str):
         self.currentState=newState
-
 
 class ScreenClass():
     def __init__(self):
@@ -99,12 +98,12 @@ class KeyBindManager:
 
 class Game:
     def __init__(self, state: GameState, sc:ScreenClass, se:turtleCreator, sh:turtleCreator, ssg:turtleCreator, t:turtleCreator):
-        self.screen=sc
+        self.screen=sc.screen
         self.state=state
         self.time_elapsed=0
         self.selectExit=se
         self.selectHistory=sh
-        self.selectStartGame=ScreenClass
+        self.selectStartGame=ssg
 
     def start_game(self):
 
