@@ -97,12 +97,134 @@ class GameState:
             self.currentState = new_state
             self.screen.keymanager.function_caller()
 
+class FileManager:
+    def __init__(self,scoreFile, keybindmanager:keyBindManager):   #CANNOT PASS A KEYBINDMANAGER OBJECT REFERENCE
+        self.score_file=scoreFile
+    
+
+    def history_display(self):
+            
+            self.score_file= open("score_history.txt","r")
+
+            his=self.score_file.read()
+            self.scturtle=Turtle("square","white",0,-250)
+            self.scturtle.write(his,align="center",font=("Arial",16,"normal"))
+            self.scturtle.shapesize(1,16)
+            self.scturtle.onclick(self.KeyBindManager.back_caller)     #CANNOT ACCESS THE KEYBIND MANAGER CLASS
+            self.scturtle.write("Press B to go back to main menu",align="center",font=("Arial",16,"normal"))
+            self.scturtle.color("")
+
+    def file_sorter(self):
+        self.score_file=open("score_history.txt")
+        self.highest_arr=[]
+        for x in range(4):
+            self.score_file.readline()
+
+        self.line=self.score_file.readline()
+        while self.line:
+            self.highest_arr.append(int(self.line))
+            self.line= self.score_file.readline()
+        self.score_file.close()
+        for x in range(len(self.highest_arr)):
+            for y in range(len(self.highest_arr)-1-x):
+                if self.highest_arr[y]<self.highest_arr[y+1]:
+                    self.highest_arr[y],self.highest_arr[y+1]=self.highest_arr[y+1],self.highest_arr[y]
+        
+        self.score_file=open("score_history.txt","w")
+        
+
+        self.score_file.write("ONLY TOP 5 SCORES ARE SHOWN\n\n\n\n")
+        if len(self.highest_arr)>5:
+            for x in range(5):
+                self.score_file.write(str(self.highest_arr[x]))
+                self.score_file.write("\n")
+        else:
+            for x in range(len(self.highest_arr)):
+                self.score_file.write(str(self.highest_arr[x]))
+                self.score_file.write("\n")
+
+                
+        self.score_file.close()
+
+
+
+class Game:
+    def __init__(self, state: GameState, sc:ScreenClass):
+        self.screen=sc.screen
+        self.score=0
+        self.state=state.currentState
+        self.time_elapsed=0
+        self.selectExit=sc.selectExit
+        self.selectHistory=sc.selectHistory
+        self.selectStartGame=sc.selectStartGame
+        self.timer_turtle=turtleCreator("square","white",-750,370)
+        self.score_turtle=turtleCreator("","white",-550,370)
+        self.t=sc.textTurtle
+    def start_game(self):
+
+        if self.time_elapsed==0:
+
+            self.selectExit.hideturtle()
+            self.selectHistory.hideturtle()
+            self.selectStartGame.hideturtle()
+            self.screen.bgpic("thumb.gif")
+            self.score=0
+            self.inner_timer=3
+            self.t.shapesize(1,1)
+            self.timer_turtle.hideturtle()
+            self.score_turtle.hideturtle()
+        
+            self.score_display(0)
+            self.timer_turtle.write("Time:" + "0" ,align="left",font=("Arial",24,"bold"))
+        else:
+            self.t.shape("circle")
+            self.t.color("white")
+            self.t.shapesize(1,1)
+            
+            
+    def time_display(self,x):
+        while self.time_elapsed<10 and self.state=="running":
+            self.time_elapsed+=1
+            sleep(1)
+            self.timer_turtle.clear()
+            self.timer_turtle.write(("Time:" + str(self.time_elapsed)), align="left",font=("Arial",24,"bold"))
+
+
+    def startTimeThread(self):   
+        Thread(target=self.time_display,args=(self.time_elapsed,),daemon=True).start()
+        self.t.showturtle()
+        self.t.onclick(self.click_on_turtle)
+
+        while self.time_elapsed< 10 and self.state =="running":
+            current_time=time()
+            next_move_time=current_time + self.inner_timer
+
+            while time() < next_move_time and self.state=="running":
+                self.screen.update()
+                sleep(0.01)
+
+            if self.state=="running":
+                self.t.randomTeleport()
+
+        if self.state=="running":
+            self.time_elapsed=0
+            self.keyBindManager.exit()  #CANNOT ACCES KEYBINDMANAGER CLASS
+
+
+    def score_display(self,s):
+        self.score_turtle.clear()
+        self.score_turtle.write("Score:" +str(s),align="left",font=("Arial",24,"bold"))
+
+
+
 
 
 class KeyBindManager:         #CONFUSION
-    def __init__(self, screen: _Screen,state: GameState):
+    def __init__(self, screen: _Screen,state: GameState,game: Game, fileManager: FileManager):
         self.gameState=state
         self.state=state  #CONFUSION
+        self.game=game
+        self.file=fileManager
         self.screen = screen
         self.scturtle=turtleCreator("circle","white")
         self.startKey="s"
@@ -212,6 +334,7 @@ class KeyBindManager:         #CONFUSION
     def start_game(self):
         if self.state=="idle":
             #CONFUSION as don't have access startScreenSetup function from ScreenClass 
+            pass
 
     def go_back(self):
         self.state.change_state("idle")
@@ -220,22 +343,22 @@ class KeyBindManager:         #CONFUSION
     def history_display(self):
         if self.state!="running":
             
-            self.screen.selectExit.hideturtle()
+            self.screen.selectExit.hideturtle()              #CONFUSION
             self.screen.selectHistory.hideturtle()
             self.screen.selectStartGame.hideturtle()
             self.screen.bgpic("history.gif")
         
             self.screen.textTurtle.clear()
-            self.timer_turtle.clear()
-            self.score_turtle.clear()
-            self.t.hideturtle()
-            self.timer_turtle.hideturtle()
-            self.score_turtle.hideturtle()
+            self.game.timer_turtle.clear()
+            self.game.score_turtle.clear()
+            self.screen.textTurle.hideturtle()    #CONFUSION
+            self.game.timer_turtle.hideturtle()
+            self.game.score_turtle.hideturtle()
         
-            self.file_sorter()
-            self.score_file= open("score_history.txt","r")
+            self.file.file_sorter()
+            self.file.score_file= open("score_history.txt","r")
 
-            his=self.score_file.read()
+            his=self.file.score_file.read()
             self.scturtle=Turtle()
             self.scturtle.hideturtle()
             self.scturtle.color("white")
@@ -253,24 +376,24 @@ class KeyBindManager:         #CONFUSION
         for x in [self.startChangerTurtle,self.historyDisplayChangerTurtle,self.pauseChanger, self.resumeChanger,self.backChanger, self.exitChanger]:
             x.clear()
             x.hideturtle()
-        new_key = self.s.textinput("Key Bind Change", "Enter the new button to set (single key or special: enter, escape): ")
+        new_key = self.screen.textinput("Key Bind Change", "Enter the new button to set (single key or special: enter, escape): ")
         if not new_key:
-            self.t.write("No change made. Keeping old key.", align="center", font=("Courier", 16))
+            self.screen.textinput.write("No change made. Keeping old key.", align="center", font=("Courier", 16))
             return
         new_key = new_key.strip()
         mapping = {"enter": "Return", "return": "Return", "esc": "Escape", "escape": "Escape", "space": "space", " ": "space"}
         mapped_key = mapping.get(new_key.lower(), new_key)
         old_key = getattr(self, attr_name, None)
         if old_key:
-            self.s.onkeypress(None, old_key)
-        self.s.onkeypress(func, mapped_key)
+            self.screen.onkeypress(None, old_key)
+        self.screen.onkeypress(func, mapped_key)
         setattr(self, attr_name, mapped_key)
-        self.s.listen()
-        self.t.clear()
-        self.t.teleport(20, -80)
-        self.t.write(f"New key set: {mapped_key}", align="center", font=("Courier", 16))
-        self.t.teleport(20, -110)
-        self.t.write("Press B or click here to go back to settings", align="center", font=("Courier", 14))
+        self.screen.listen()
+        self.screen.textTurtle.clear()
+        self.screen.textTurtle.teleport(20, -80)
+        self.screen.textTurtle.write(f"New key set: {mapped_key}", align="center", font=("Courier", 16))
+        self.screen.textTurtle.teleport(20, -110)
+        self.screen.textTurtle.write("Press B or click here to go back to settings", align="center", font=("Courier", 14))
 
         
 
@@ -318,133 +441,6 @@ class KeyBindManager:         #CONFUSION
             else:
                 x.shapesize(2, 29)  
             x.color("")
-            self.s.listen()
-
-    
-
-   
-
-
-
-
-
-
-
-
-
-class Game:
-    def __init__(self, state: GameState, sc:ScreenClass, se:turtleCreator, sh:turtleCreator, ssg:turtleCreator, t:turtleCreator):
-        self.screen=sc.screen
-        self.state=state
-        self.time_elapsed=0
-        self.selectExit=se
-        self.selectHistory=sh
-        self.selectStartGame=ssg
-        self.timer_turtle=turtleCreator("square","white",-750,370)
-        self.score_turtle=turtleCreator("","white",-550,370)
-
-    def start_game(self):
-
-        if self.time_elapsed==0:
-            
-            self.selectExit.hideturtle()
-            self.selectHistory.hideturtle()
-            self.selectStartGame.hideturtle()
-            self.screen.bgpic("thumb.gif")
-            self.score=0
-            self.inner_timer=3
-
-            self.t.shape("circle")
-            self.t.shapesize(1,1)
-            self.t.color("white")
-    
-
-            self.timer_turtle.hideturtle()
-            self.score_turtle.hideturtle()
-        
-            self.score_display(0)
-            self.timer_turtle.write("Time:" + "0" ,align="left",font=("Arial",24,"bold"))
-        else:
-            self.t.shape("circle")
-            self.t.color("white")
-            self.t.shapesize(1,1)
-            
-            
-        
-
-        Thread(target=self.time_display,args=(self.time_elapsed,),daemon=True).start()
-        self.t.showturtle()
-        self.t.onclick(self.click_on_turtle)
-
-        while self.time_elapsed< 10 and self.state =="running":
-            current_time=time()
-            next_move_time=current_time + self.inner_timer
-
-            while time() < next_move_time and self.state=="running":
-                self.s.update()
-                sleep(0.01)
-
-            if self.state=="running":
-                self.tele()
-
-        if self.state=="running":
-            self.time_elapsed=0
-            self.end_game()
-
-
-class fileManager:
-    def __init__(self,scoreFile):
-        self.score_file=scoreFile
-    
-
-    def history_display(self):
-            
-            self.score_file= open("score_history.txt","r")
-
-            his=self.score_file.read()
-            self.scturtle=Turtle()
-            self.scturtle.hideturtle()
-            self.scturtle.color("white")
-            self.scturtle.write(his,align="center",font=("Arial",16,"normal"))
-            self.scturtle.teleport(0, -250)
-            self.scturtle.showturtle()
-            self.scturtle.shape("square")
-            self.scturtle.shapesize(1,16)
-            self.scturtle.onclick(self.back_caller)
-            self.scturtle.write("Press B to go back to main menu",align="center",font=("Arial",16,"normal"))
-            self.scturtle.color("")
-
-    def file_sorter(self):
-        self.score_file=open("score_history.txt")
-        self.highest_arr=[]
-        for x in range(4):
-            self.score_file.readline()
-
-        self.line=self.score_file.readline()
-        while self.line:
-            self.highest_arr.append(int(self.line))
-            self.line= self.score_file.readline()
-        self.score_file.close()
-        for x in range(len(self.highest_arr)):
-            for y in range(len(self.highest_arr)-1-x):
-                if self.highest_arr[y]<self.highest_arr[y+1]:
-                    self.highest_arr[y],self.highest_arr[y+1]=self.highest_arr[y+1],self.highest_arr[y]
-        
-        self.score_file=open("score_history.txt","w")
-        
-
-        self.score_file.write("ONLY TOP 5 SCORES ARE SHOWN\n\n\n\n")
-        if len(self.highest_arr)>5:
-            for x in range(5):
-                self.score_file.write(str(self.highest_arr[x]))
-                self.score_file.write("\n")
-        else:
-            for x in range(len(self.highest_arr)):
-                self.score_file.write(str(self.highest_arr[x]))
-                self.score_file.write("\n")
-
-                
-        self.score_file.close()
-
+            self.screen.listen()
 
 done()
