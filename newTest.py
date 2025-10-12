@@ -8,7 +8,7 @@ import os
 turtlesList=[]
 
 
-class turtleCreator(Turtle):
+class TurtleCreator(Turtle):
     def __init__(self,shape,color,xCoor=0,yCoor=0):
         turtlesList.append(self)
         self.shape(shape)
@@ -34,11 +34,11 @@ class ScreenClass:
     def __init__(self):
         self.screen=_Screen
         self.screen.setup(1.0, 1.0)
-        self.selectStartGame = turtleCreator("square", "white", -58, 180)
-        self.selectHistory = turtleCreator("square", "white", 25.9, 115)
-        self.selectExit = turtleCreator("square", "white", 2, 50)
-        self.changeKeyBindTurtle = turtleCreator("square", "white", 15, -17)
-        self.textTurtle=turtleCreator("square","white",0,70)
+        self.selectStartGame = TurtleCreator("square", "white", -58, 180)
+        self.selectHistory = TurtleCreator("square", "white", 25.9, 115)
+        self.selectExit = TurtleCreator("square", "white", 2, 50)
+        self.changeKeyBindTurtle = TurtleCreator("square", "white", 15, -17)
+        self.textTurtle=TurtleCreator("square","white",0,70)
 
 
     def imageSetup(self):
@@ -157,8 +157,8 @@ class Game:
         self.selectExit=sc.selectExit
         self.selectHistory=sc.selectHistory
         self.selectStartGame=sc.selectStartGame
-        self.timer_turtle=turtleCreator("square","white",-750,370)
-        self.score_turtle=turtleCreator("","white",-550,370)
+        self.timer_turtle=TurtleCreator("square","white",-750,370)
+        self.score_turtle=TurtleCreator("","white",-550,370)
         self.t=sc.textTurtle
     def start_game(self):
 
@@ -216,9 +216,6 @@ class Game:
         self.score_turtle.write("Score:" +str(s),align="left",font=("Arial",24,"bold"))
 
 
-
-
-
 class KeyBindManager:         #CONFUSION
     def __init__(self, screen: _Screen,state: GameState,game: Game, fileManager: FileManager):
         self.gameState=state
@@ -226,7 +223,7 @@ class KeyBindManager:         #CONFUSION
         self.game=game
         self.file=fileManager
         self.screen = screen
-        self.scturtle=turtleCreator("circle","white")
+        self.scturtle=TurtleCreator("circle","white")
         self.startKey="s"
         self.pauseKey="p"
         self.historyKey="h"
@@ -314,7 +311,7 @@ class KeyBindManager:         #CONFUSION
     def keyBindChange_caller(self,x=None,y=None):
 
         if self.state.currentState=="idle":
-            turtleCreator.hideAllTurtles()
+            TurtleCreator.hideAllTurtles()
             self.screen.textTurtle.clear()  # CONFUSION
             self.state.change_state("changeKeyBind")
 
