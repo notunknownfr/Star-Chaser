@@ -9,21 +9,28 @@ turtlesList=[]
 
 
 class turtleCreator(Turtle):
-    def __init__(self,shape,color,xCoor,yCoor):
+    def __init__(self,shape,color,xCoor=0,yCoor=0):
         turtlesList.append(self)
         self.shape(shape)
         self.color(color)
         self.teleport(xCoor,yCoor)
 
+    @staticmethod
+    def hideAllTurtles(self):
+        for turtle in turtlesList:
+            turtle.hideturtle()
 
-class GameState:
-    def __init__(self, state="idle"):
-        self.currentState=state
+    @staticmethod 
+    def clearAllTurtles():
+        for turtle in turtlesList:
+            turtle.clear()
 
-    def changeState(self, newState:str):
-        self.currentState=newState
+    def randomTeleport(self):
+        self.teleport(random.randint(-300, 300), random.randint(-300, 300))
 
-class ScreenClass():
+
+
+class ScreenClass:
     def __init__(self):
         self.screen=_Screen
         self.screen.setup(1.0, 1.0)
@@ -31,6 +38,7 @@ class ScreenClass():
         self.selectHistory = turtleCreator("square", "white", 25.9, 115)
         self.selectExit = turtleCreator("square", "white", 2, 50)
         self.changeKeyBindTurtle = turtleCreator("square", "white", 15, -17)
+        self.textTurtle=turtleCreator("square","white",0,70)
 
 
     def imageSetup(self):
@@ -49,52 +57,280 @@ class ScreenClass():
     def StartScreenSetup(self):
         self.screen.bgpic("thumb.gif")
 
-        t=turtleCreator("square","white",0,70)
-        t.teleport(-230,-30)
-        t.write("PRESS S TO START GAME\n\nPRESS H TO DISPLAY SCORE HISTORY\n\nPRESS ESCAPE TO EXIT THE GAME\n\nPRESS C TO CHANGE KEY SETTINGS")
-        t.hideturtle()
+        self.textTurtle.teleport(-230,-30)
+        self.textTurtle.write("PRESS S TO START GAME\n\nPRESS H TO DISPLAY SCORE HISTORY\n\nPRESS ESCAPE TO EXIT THE GAME\n\nPRESS C TO CHANGE KEY SETTINGS")
+        self.textTurtle.hideturtle()
        
         self.selectStartGame.shapesize(1.3,17)
         self.selectHistory.shapesize(1.3,25.8)
         self.selectExit.shapesize(1.3,23.2)
         self.changeKeyBindTurtle.shapesize(1.3,24.3)
 
-class KeyBindManager:
-    def __init__(self, screen: _Screen):
-        self.screen = screen
+        self.keymanager=KeyBindManager(self.screen)
+        self.keymanager.setup_keybinds()
 
+
+class GameState:
+    def __init__(self, screen: ScreenClass, state="idle"):
+        self.currentState=state
+        self.screen=screen
+
+
+    def change_state(self, new_state):
+        if self.currentState==new_state:
+            pass
+
+        elif self.currentState=="running":
+            if new_state=="pause":
+                self.currentState=new_state
+                self.screen.keymanager.function_caller()
+
+            else:    
+                pass
+        
+        elif self.currentState=="changeKeyBind":
+            if new_state=="back":
+                self.currentState="back"
+                self.screen.keymanager.function_caller()
+
+        else:
+            self.currentState = new_state
+            self.screen.keymanager.function_caller()
+
+
+
+class KeyBindManager:         #CONFUSION
+    def __init__(self, screen: _Screen,state: GameState):
+        self.gameState=state
+        self.state=state  #CONFUSION
+        self.screen = screen
+        self.scturtle=turtleCreator("circle","white")
+        self.startKey="s"
+        self.pauseKey="p"
+        self.historyKey="h"
+        self.backKey="b"
+        self.resumeKey="r"
+        self.exitKey="Escape"
+        self.keyBindChangeKey="c"
 
     def setup_keybinds(self):
         self.screen.listen()  
-        self.screen.onkeypress(self.start_game, "s")
-        self.screen.onkeypress(self.show_history, "h")
-        self.screen.onkeypress(self.exit_game, "Escape")
-        self.screen.onkeypress(self.change_keys, "c")
-        self.screen.onkeypress(self.pause_game,"p")
-        self.screen.onkeypress(self.resume_game,"r")
-        self.screen.onkeypress(self.back,"b")
+        self.screen.onkeypress(self.start_game, self.startKey)
+        self.screen.onkeypress(self.history_display, self.historyKey)
+        self.screen.onkeypress(self.exit_caller, self.exitKey)
+        self.screen.onkeypress(self.keyBindChange_caller, self.keyBindChangeKey)
+        self.screen.onkeypress(self.pause_caller,self.pauseKey)
+        self.screen.onkeypress(self.resume_caller,self.resumeKey)
+        self.screen.onkeypress(self.back_caller,self.backKey)
 
-    def start_game(self):
-        print("start game")
 
-    def pause_game(self):
-        print("pause game")
+    def function_caller(self):
+        if self.state.currentState == "idle":
+            #confusion 
+            pass
 
-    
-    def resume_game(self):
-        print("resume game")
+        elif self.state.currentState == "running":
+            self.start_game()
 
-    def back(self):
-        print("back")
+        elif self.state.currentState=="changeKeyBind":
+            self.changeKeyBind()
 
-    def show_history(self):
-        print("history")
+        elif self.state.currentState=="back":
+            self.go_back()
+
+        elif self.state.currentState=="history":
+            self.history_display()
+
+        elif self.state.currentState=="pause":
+            self.pause()
+
+        elif self.state.currentState=="resume":
+            self.state="running"
+            self.start_game()
+            
+
+
+    def resume_caller(self,x=None,y=None):
+        if self.state.currentState=="pause":
+            self.screen.textTurtle.clear()  #CONFUSION
+            self.state.change_state("resume")
+
+        else:
+            pass
+
+    def back_caller(self,x=None,y=None):
         
-    def exit_game(self):
+        if self.state.currentState=="history":
+            self.scturtle.clear()
+            self.scturtle.hideturtle()
+            self.state.change_state("back")
+        elif self.state.currentState=="changeKeyBind":
+            self.state.change_state("back")
+
+            
+    
+    def run_caller(self,x=None,y=None):
+        if self.state.currentState=="idle" or self.state.currentState=="exit":
+            return self.state.change_state("running")
+        else:
+            pass
+    
+    def exit_caller(self,x=None,y=None):
+        self.exit()
+
+    def history_display_caller(self,x=None,y=None):
+        if self.state.currentState=="idle" or self.state.currentState=="exit":
+            self.state.change_state("history")
+        else:
+            pass
+
+        
+    def pause_caller(self):
+        if self.state.currentState == "running":
+            self.state.change_state("pause")
+
+    def keyBindChange_caller(self,x=None,y=None):
+
+        if self.state.currentState=="idle":
+            turtleCreator.hideAllTurtles()
+            self.screen.textTurtle.clear()  # CONFUSION
+            self.state.change_state("changeKeyBind")
+
+    def exit(self):
         self.screen.bye()
 
-    def change_keys(self):
-        print("change keys")
+    def pause(self):
+
+        self.screen.textTurtle.shape("square")        #CONFUSION
+        self.screen.textTurtle.onclick(self.resume_caller)
+        self.screen.textTurtle.shapesize(2,16)
+        self.screen.textTurtle.teleport(-30,0)
+        self.screen.textTurtle.write("Game paused, press R to resume",align="center",font=("Arial",16,"normal"))
+        self.screen.textTurtle.color("")
+
+
+    def start_game(self):
+        if self.state=="idle":
+            #CONFUSION as don't have access startScreenSetup function from ScreenClass 
+
+    def go_back(self):
+        self.state.change_state("idle")
+
+
+    def history_display(self):
+        if self.state!="running":
+            
+            self.screen.selectExit.hideturtle()
+            self.screen.selectHistory.hideturtle()
+            self.screen.selectStartGame.hideturtle()
+            self.screen.bgpic("history.gif")
+        
+            self.screen.textTurtle.clear()
+            self.timer_turtle.clear()
+            self.score_turtle.clear()
+            self.t.hideturtle()
+            self.timer_turtle.hideturtle()
+            self.score_turtle.hideturtle()
+        
+            self.file_sorter()
+            self.score_file= open("score_history.txt","r")
+
+            his=self.score_file.read()
+            self.scturtle=Turtle()
+            self.scturtle.hideturtle()
+            self.scturtle.color("white")
+            self.scturtle.write(his,align="center",font=("Arial",16,"normal"))
+            self.scturtle.teleport(0, -250)
+            self.scturtle.showturtle()
+            self.scturtle.shape("square")
+            self.scturtle.shapesize(1,16)
+            self.scturtle.onclick(self.back_caller)
+            self.scturtle.write("Press B to go back to main menu",align="center",font=("Arial",16,"normal"))
+            self.scturtle.color("")
+
+    def keyChange(self, attr_name, func):
+
+        for x in [self.startChangerTurtle,self.historyDisplayChangerTurtle,self.pauseChanger, self.resumeChanger,self.backChanger, self.exitChanger]:
+            x.clear()
+            x.hideturtle()
+        new_key = self.s.textinput("Key Bind Change", "Enter the new button to set (single key or special: enter, escape): ")
+        if not new_key:
+            self.t.write("No change made. Keeping old key.", align="center", font=("Courier", 16))
+            return
+        new_key = new_key.strip()
+        mapping = {"enter": "Return", "return": "Return", "esc": "Escape", "escape": "Escape", "space": "space", " ": "space"}
+        mapped_key = mapping.get(new_key.lower(), new_key)
+        old_key = getattr(self, attr_name, None)
+        if old_key:
+            self.s.onkeypress(None, old_key)
+        self.s.onkeypress(func, mapped_key)
+        setattr(self, attr_name, mapped_key)
+        self.s.listen()
+        self.t.clear()
+        self.t.teleport(20, -80)
+        self.t.write(f"New key set: {mapped_key}", align="center", font=("Courier", 16))
+        self.t.teleport(20, -110)
+        self.t.write("Press B or click here to go back to settings", align="center", font=("Courier", 14))
+
+        
+
+
+    def changeKeyBind(self):
+        self.startChangerTurtle=Turtle()
+        self.historyDisplayChangerTurtle=Turtle()
+        self.exitChanger=Turtle()
+        self.pauseChanger=Turtle()
+        self.resumeChanger=Turtle()
+        self.backChanger=Turtle()
+        font_size = 23
+
+        self.startChangerTurtle.onclick(lambda x, y: self.keyChange("startKey", self.run_caller))
+        self.historyDisplayChangerTurtle.onclick(lambda x, y: self.keyChange("historyKey", self.history_display_caller))
+        self.pauseChanger.onclick(lambda x, y: self.keyChange("pauseKey", self.pause_caller))
+        self.resumeChanger.onclick(lambda x, y: self.keyChange("resumeKey", self.resume_caller))
+        self.backChanger.onclick(lambda x, y: self.keyChange("backKey", self.back_caller))
+        self.exitChanger.onclick(lambda x, y: self.keyChange("exitKey", self.exit_caller))
+
+
+        yDim=200
+        for x in [self.startChangerTurtle,self.historyDisplayChangerTurtle,self.pauseChanger, self.resumeChanger,self.backChanger, self.exitChanger]:
+            x.color("#DCCFC2")  
+            x.teleport(0, yDim)
+            yDim-=70
+
+        self.startChangerTurtle.write("Press here to change 'start' button keybind", align="center", font=("Arial", font_size))
+        self.historyDisplayChangerTurtle.write("Press here to change 'History display' button keybind", align="center", font=("Arial", font_size))
+        self.pauseChanger.write("Press here to change 'pause' button keybind", align="center", font=("Arial", font_size))
+        self.resumeChanger.write("Press  to change 'resume' button keybind", align="center", font=("Arial", font_size))
+        self.backChanger.write("Press here to change 'back' button keybind", align="center", font=("Arial", font_size))
+        self.exitChanger.write("Press here to change 'Exit' button keybind", align="center", font=("Arial", font_size))
+        
+        
+        
+        
+        for x in [self.startChangerTurtle,self.historyDisplayChangerTurtle,self.pauseChanger, self.resumeChanger,self.backChanger, self.exitChanger]:
+            x.shape("square")
+            yDim=x.ycor()
+            x.teleport(0,yDim+15)
+
+            if x==self.historyDisplayChangerTurtle:
+                x.shapesize(2, 35.5)
+            else:
+                x.shapesize(2, 29)  
+            x.color("")
+            self.s.listen()
+
+    
+
+   
+
+
+
+
+
+
+
+
 
 class Game:
     def __init__(self, state: GameState, sc:ScreenClass, se:turtleCreator, sh:turtleCreator, ssg:turtleCreator, t:turtleCreator):
@@ -104,12 +340,12 @@ class Game:
         self.selectExit=se
         self.selectHistory=sh
         self.selectStartGame=ssg
+        self.timer_turtle=turtleCreator("square","white",-750,370)
+        self.score_turtle=turtleCreator("","white",-550,370)
 
     def start_game(self):
 
         if self.time_elapsed==0:
-            self.timer_turtle=turtleCreator("square","white",-750,370)
-            self.score_turtle=turtleCreator("","white",-550,370)
             
             self.selectExit.hideturtle()
             self.selectHistory.hideturtle()
