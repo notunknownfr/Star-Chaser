@@ -30,7 +30,7 @@ class TurtleCreator(Turtle):
 
 
 
-class ScreenClass:
+class ScreenClass(_Screen):
     def __init__(self):
         self.screen=_Screen
         self.screen.setup(1.0, 1.0)
