@@ -1,11 +1,11 @@
-from turtle import _Screen, Turtle, done
+from turtle import Screen, Turtle, done
 from PIL import Image
 from turtle_factory import TurtleFactory
-from settings import KeyBindManager
 
-class ScreenClass(_Screen):
+class ScreenClass():
     def __init__(self):
-        self.screen=_Screen
+
+        self.screen=Screen()
         self.screen.setup(1.0, 1.0)
         self.selectStartGame = TurtleFactory("square", "white", -58, 180)
         self.selectHistory = TurtleFactory("square", "white", 25.9, 115)
@@ -26,8 +26,9 @@ class ScreenClass(_Screen):
         img=img.resize((1920, 1080))
         img.save("history.gif")
 
-
     def StartScreenSetup(self):
+        from settings import KeyBindManager
+
         self.screen.bgpic("thumb.gif")
 
         self.textTurtle.teleport(-230,-30)
@@ -39,6 +40,12 @@ class ScreenClass(_Screen):
         self.selectExit.shapesize(1.3,23.2)
         self.changeKeyBindTurtle.shapesize(1.3,24.3)
 
-        self.keymanager=KeyBindManager(self.screen)
+        self.keymanager=KeyBindManager(self.screen,"idle",)
         self.keymanager.setup_keybinds()
 
+if __name__ == "__main__":
+    screen = ScreenClass()
+    screen.imageSetup()
+    screen.StartScreenSetup() 
+
+    done()

@@ -2,7 +2,7 @@ from turtle import Turtle
 from settings import KeyBindManager
 
 class FileManager:
-    def __init__(self,scoreFile,  keybindmanager:KeyBindManager):   #CANNOT PASS A KEYBINDMANAGER OBJECT REFERENCE
+    def __init__(self,scoreFile,  keybindmanager:KeyBindManager):   #CANNOT PASS A KEYBINDMANAGER OBJECT REFERENCE 
         self.score_file=scoreFile
     
 
@@ -14,7 +14,7 @@ class FileManager:
             self.scturtle=Turtle("square","white",0,-250)
             self.scturtle.write(his,align="center",font=("Arial",16,"normal"))
             self.scturtle.shapesize(1,16)
-            self.scturtle.onclick(self.KeyBindManager.back_caller)     #CANNOT ACCESS THE KEYBIND MANAGER CLASS
+            self.scturtle.onclick(KeyBindManager.back_caller())     #CANNOT ACCESS THE KEYBIND MANAGER CLASS 
             self.scturtle.write("Press B to go back to main menu",align="center",font=("Arial",16,"normal"))
             self.scturtle.color("")
 
@@ -49,5 +49,4 @@ class FileManager:
 
                 
         self.score_file.close()
-
 

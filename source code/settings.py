@@ -1,11 +1,11 @@
-from game import Game
+
 from state_machine import GameState
 from turtle import _Screen
 from score_manager import FileManager
 from turtle_factory import TurtleFactory
 
 class KeyBindManager:         #CONFUSION
-    def __init__(self, screen: _Screen,state: GameState,game: Game, fileManager: FileManager):
+    def __init__(self, screen: _Screen,state: GameState,game, fileManager: FileManager):
         self.gameState=state
         self.state=state  #CONFUSION
         self.game=game
@@ -117,6 +117,7 @@ class KeyBindManager:         #CONFUSION
 
 
     def start_game(self):
+        from game import Game
         if self.state=="idle":
             #CONFUSION as don't have access startScreenSetup function from ScreenClass 
             pass

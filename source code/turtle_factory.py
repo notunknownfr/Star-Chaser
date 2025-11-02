@@ -5,6 +5,7 @@ turtlesList=[]
 
 class TurtleFactory(Turtle):
     def __init__(self,shape="square",color="white",xCoor=0,yCoor=0):
+        super().__init__()
         turtlesList.append(self)
         self.shape(shape)
         self.color(color)
@@ -22,3 +23,5 @@ class TurtleFactory(Turtle):
 
     def randomTeleport(self):
         self.teleport(random.randint(-300, 300), random.randint(-300, 300))
+
+
