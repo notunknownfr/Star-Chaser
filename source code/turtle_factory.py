@@ -12,7 +12,7 @@ class TurtleFactory(Turtle):
         self.teleport(xCoor,yCoor)
 
     @staticmethod
-    def hideAllTurtles(self):
+    def hideAllTurtles():
         for turtle in turtlesList:
             turtle.hideturtle()
 

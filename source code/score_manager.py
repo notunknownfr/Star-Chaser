@@ -1,25 +1,28 @@
 from turtle import Turtle
-from settings import KeyBindManager
+# from settings import KeyBindManager
 
 class FileManager:
-    def __init__(self,scoreFile,  keybindmanager:KeyBindManager):   #CANNOT PASS A KEYBINDMANAGER OBJECT REFERENCE 
+    def __init__(self, scoreFile, keybindmanager):
+        self.keybindmanager = keybindmanager 
         self.score_file=scoreFile
     
 
     def history_display(self):
             
-            self.score_file= open("score_history.txt","r")
+            self.score_file= open("source/score_history.txt","r")
 
             his=self.score_file.read()
             self.scturtle=Turtle("square","white",0,-250)
             self.scturtle.write(his,align="center",font=("Arial",16,"normal"))
             self.scturtle.shapesize(1,16)
-            self.scturtle.onclick(KeyBindManager.back_caller())     #CANNOT ACCESS THE KEYBIND MANAGER CLASS 
+            
+            if self.keybindmanager:
+                self.scturtle.onclick(self.keybindmanager.back_caller) 
             self.scturtle.write("Press B to go back to main menu",align="center",font=("Arial",16,"normal"))
             self.scturtle.color("")
 
     def file_sorter(self):
-        self.score_file=open("score_history.txt")
+        self.score_file=open("source/score_history.txt")
         self.highest_arr=[]
         for x in range(4):
             self.score_file.readline()
@@ -34,7 +37,7 @@ class FileManager:
                 if self.highest_arr[y]<self.highest_arr[y+1]:
                     self.highest_arr[y],self.highest_arr[y+1]=self.highest_arr[y+1],self.highest_arr[y]
         
-        self.score_file=open("score_history.txt","w")
+        self.score_file=open("source/score_history.txt","w")
         
 
         self.score_file.write("ONLY TOP 5 SCORES ARE SHOWN\n\n\n\n")
